@@ -5,6 +5,26 @@
 #include "harness.h"
 #include "queue.h"
 
+/*
+ * Create an element for this string initialized.
+ * Return NULL if could not allocate space or this string is NULL
+ */
+static element_t *alloc_qvalue(const char *s)
+{
+    if (!s)
+        return NULL;
+    element_t *elem = malloc(sizeof(element_t));
+    if (!elem)
+        return NULL;
+    size_t slen = strlen(s) + 1;
+    elem->value = malloc(slen);
+    if (!elem->value) {
+        free(elem);
+        return NULL;
+    }
+    memcpy(elem->value, s, slen);
+    return elem;
+}
 /* Notice: sometimes, Cppcheck would find the potential NULL pointer bugs,
  * but some of them cannot occur. You can suppress them by adding the
  * following line.
@@ -46,18 +66,11 @@ void q_free(struct list_head *l)
  */
 bool q_insert_head(struct list_head *head, char *s)
 {
-    if (!head || !s)
+    if (!head)
         return false;
-    element_t *elem = malloc(sizeof(element_t));
+    element_t *elem = alloc_qvalue(s);
     if (!elem)
         return false;
-    size_t slen = strlen(s) + 1;
-    elem->value = malloc(slen);
-    if (!elem->value) {
-        free(elem);
-        return false;
-    }
-    memcpy(elem->value, s, slen);
     list_add(&elem->list, head);
     return true;
 }
@@ -71,6 +84,12 @@ bool q_insert_head(struct list_head *head, char *s)
  */
 bool q_insert_tail(struct list_head *head, char *s)
 {
+    if (!head)
+        return false;
+    element_t *elem = alloc_qvalue(s);
+    if (!elem)
+        return false;
+    list_add_tail(&elem->list, head);
     return true;
 }
 
